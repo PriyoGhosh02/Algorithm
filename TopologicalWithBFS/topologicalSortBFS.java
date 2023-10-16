@@ -3,85 +3,122 @@ package TopologicalWithBFS;
 import java.util.*;
 
 public class topologicalSortBFS {
-    
-  public static void main(String[] args) {
-   int numVertices = 6;
-        Graph graph = new Graph(numVertices);
-        
-        // Add edges to the graph
-        graph.addEdge(5, 2);
-        graph.addEdge(5, 0);
-        graph.addEdge(4, 0);
-        graph.addEdge(4, 1);
-        graph.addEdge(2, 3);
-        graph.addEdge(3, 1);
-        
-        // Perform topological sort
-        List<Integer> result = topologicalSort(graph);
-        
-        // Print the sorted order
-        System.out.println("Topological Sort Order:");
-        for (int vertex : result) {
-            System.out.print(vertex + " ");
-        }
-    }
-    
+
     static class Graph {
         private int numVertices;
-        private List<Integer>[] adjacencyList;
+        private int[][] adjacencyMatrix;
 
         Graph(int numVertices) {
             this.numVertices = numVertices;
-            adjacencyList = new ArrayList[numVertices];
-            for (int i = 0; i < numVertices; i++) {
-                adjacencyList[i] = new ArrayList<>();
-            }
+            adjacencyMatrix = new int[numVertices][numVertices];
         }
 
         void addEdge(int from, int to) {
-            adjacencyList[from].add(to);
+            adjacencyMatrix[from][to] = 1;
         }
     }
 
     public static List<Integer> topologicalSort(Graph graph) {
         List<Integer> result = new ArrayList<>();
         int[] inDegree = new int[graph.numVertices];
-        
-        // Calculate in-degrees for each vertex
+
         for (int i = 0; i < graph.numVertices; i++) {
-            for (int neighbor : graph.adjacencyList[i]) {
-                inDegree[neighbor]++;
+            for (int j = 0; j < graph.numVertices; j++) {
+                inDegree[j] += graph.adjacencyMatrix[i][j];
             }
         }
-        
-        // Initialize a queue for BFS
+
         Queue<Integer> queue = new LinkedList<>();
-        
-        // Add vertices with in-degree 0 to the queue
+
         for (int i = 0; i < graph.numVertices; i++) {
             if (inDegree[i] == 0) {
                 queue.offer(i);
             }
         }
-        
-        // Perform BFS
+
         while (!queue.isEmpty()) {
             int vertex = queue.poll();
             result.add(vertex);
-            
-            for (int neighbor : graph.adjacencyList[vertex]) {
-                inDegree[neighbor]--;
-                if (inDegree[neighbor] == 0) {
-                    queue.offer(neighbor);
+
+            for (int i = 0; i < graph.numVertices; i++) {
+                if (graph.adjacencyMatrix[vertex][i] == 1) {
+                    inDegree[i]--;
+                    if (inDegree[i] == 0) {
+                        queue.offer(i);
+                    }
                 }
             }
         }
-        
+
         if (result.size() != graph.numVertices) {
             System.out.println("The graph has a cycle, topological sort is not possible.");
             return new ArrayList<>();
         }
-        
+
         return result;
-  }  
+    }
+
+    public static boolean hasCycle(Graph graph) {
+        boolean[] visited = new boolean[graph.numVertices];
+        boolean[] stack = new boolean[graph.numVertices];
+
+        for (int i = 0; i < graph.numVertices; i++) {
+            if (isCyclicUtil(graph, i, visited, stack)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean isCyclicUtil(Graph graph, int vertex, boolean[] visited, boolean[] stack) {
+        if (!visited[vertex]) {
+            visited[vertex] = true;
+            stack[vertex] = true;
+
+            for (int i = 0; i < graph.numVertices; i++) {
+                if (graph.adjacencyMatrix[vertex][i] == 1) {
+                    if (!visited[i] && isCyclicUtil(graph, i, visited, stack)) {
+                        return true;
+                    } else if (stack[i]) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        stack[vertex] = false;
+        return false;
+    }
+
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+
+        System.out.print("Enter the number of vertices: ");
+        int numVertices = input.nextInt();
+        Graph graph = new Graph(numVertices);
+
+        System.out.print("Enter the number of Edges: ");
+        int numEdges = input.nextInt();
+
+        System.out.println("Enter the edges (From To):");
+        for (int i = 0; i < numEdges; i++) {
+            int from = input.nextInt();
+            int to = input.nextInt();
+            graph.addEdge(from, to);
+        }
+
+        if (hasCycle(graph)) {
+            System.out.println("The graph has a cycle.");
+        } else {
+            List<Integer> result = topologicalSort(graph);
+
+            System.out.println("Topological Sort Order:");
+            for (int vertex : result) {
+                System.out.print(vertex + " ");
+            }
+        }
+
+        input.close();
+    }
 }
