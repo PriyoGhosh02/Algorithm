@@ -1,4 +1,4 @@
-package MST;
+package MST.kruskal;
 
 import java.util.*;
 
