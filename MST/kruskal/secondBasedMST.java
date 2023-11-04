@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Scanner;
 
 class Edge {
     int source, destination, weight;
@@ -89,14 +90,18 @@ class Graph {
 
 public class secondBasedMST {
     public static void main(String[] args) {
-        int V = 4;
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter the number of vertices: ");
+        int V = scanner.nextInt();
         Graph graph = new Graph(V);
 
-        graph.addEdge(0, 1, 10);
-        graph.addEdge(0, 2, 6);
-        graph.addEdge(0, 3, 5);
-        graph.addEdge(1, 3, 15);
-        graph.addEdge(2, 3, 4);
+        System.out.println("Enter the edges (source, destination, weight) one by one:");
+        while (scanner.hasNextInt()) {
+            int source = scanner.nextInt();
+            int destination = scanner.nextInt();
+            int weight = scanner.nextInt();
+            graph.addEdge(source, destination, weight);
+        }
 
         List<Edge> mst = graph.kruskalMST();
         System.out.println("Minimum Spanning Tree (MST):");
